@@ -1,8 +1,8 @@
 import { formatDate } from '../app/format.js'
-import DashboardFormUI from '../views/DashboardFormUI.js'
 import BigBilledIcon from '../assets/svg/big_billed.js'
 import { ROUTES_PATH } from '../constants/routes.js'
 import USERS_TEST from '../constants/usersTest.js'
+import DashboardFormUI from '../views/DashboardFormUI.js'
 import Logout from "./Logout.js"
 
 export const filteredBills = (data, status) => {
@@ -131,26 +131,27 @@ export default class {
   }
 
   handleShowTickets(e, bills, index) {
-    if (this.counter === undefined || this.index !== index) this.counter = 0
-    if (this.index === undefined || this.index !== index) this.index = index
-    if (this.counter % 2 === 0) {
-      $(`#arrow-icon${this.index}`).css({ transform: 'rotate(0deg)'})
-      $(`#status-bills-container${this.index}`)
-        .html(cards(filteredBills(bills, getStatus(this.index))))
-      this.counter ++
+    if (!this.counters) this.counters = {}
+    
+    if (this.counters[index] === undefined) this.counters[index] = 0
+    
+    if (this.counters[index] % 2 === 0) {
+      $(`#arrow-icon${index}`).css({ transform: 'rotate(0deg)'})
+      $(`#status-bills-container${index}`)
+        .html(cards(filteredBills(bills, getStatus(index))))
     } else {
-      $(`#arrow-icon${this.index}`).css({ transform: 'rotate(90deg)'})
-      $(`#status-bills-container${this.index}`)
+      $(`#arrow-icon${index}`).css({ transform: 'rotate(90deg)'})
+      $(`#status-bills-container${index}`)
         .html("")
-      this.counter ++
     }
+    
+    this.counters[index]++
 
-    bills.forEach(bill => {
+    filteredBills(bills, getStatus(index)).forEach(bill => {
       $(`#open-bill${bill.id}`).click((e) => this.handleEditTicket(e, bill, bills))
     })
 
     return bills
-
   }
 
   getBillsAllUsers = () => {
