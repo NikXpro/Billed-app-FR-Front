@@ -1,6 +1,6 @@
-import VerticalLayout from './VerticalLayout.js'
 import ErrorPage from "./ErrorPage.js"
 import LoadingPage from "./LoadingPage.js"
+import VerticalLayout from './VerticalLayout.js'
 
 import Actions from './Actions.js'
 
@@ -19,8 +19,17 @@ const row = (bill) => {
     `)
   }
 
+// This function takes an array of data (bills) and returns an HTML string representing the table rows.
+// If the data is empty or null, it returns an empty string.
 const rows = (data) => {
-  return (data && data.length) ? data.map(bill => row(bill)).join("") : ""
+  if (!data || !data.length) return "" // Check if the data is empty
+
+  // Sort the data by date (from newest to oldest) and generate the HTML rows
+  return data
+    .slice() // Create a copy of the array to avoid modifying the original
+    .sort((a, b) => b.date.localeCompare(a.date)) // Sort the elements by date
+    .map(row) // Transform each element into an HTML row
+    .join("") // Join all the rows into a single string
 }
 
 export default ({ data: bills, loading, error }) => {
