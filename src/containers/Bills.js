@@ -27,11 +27,17 @@ export default class {
   handleClickIconEye = (icon) => {
     const billUrl = icon.getAttribute("data-bill-url");
     const imgWidth = Math.floor($("#modaleFile").width() * 0.5);
-    $("#modaleFile")
-      .find(".modal-body")
-      .html(
-        `<div style='text-align: center;' class="bill-proof-container"><img styles='width: 100%;' src=${billUrl} alt="Bill" /></div>`
-      );
+    const allowedExtensions = ["jpg", "jpeg", "png"];
+    const extension = billUrl
+      ? billUrl.split(".").pop().toLowerCase().split("?")[0]
+      : "";
+    let content;
+    if (billUrl && allowedExtensions.includes(extension)) {
+      content = `<div style='text-align: center;' class="bill-proof-container"><img width="100%" src=${billUrl} alt="Bill" /></div>`;
+    } else {
+      content = `<div style='color:red;text-align:center;padding:2em'>Fichier justificatif manquant ou au mauvais format</div>`;
+    }
+    $("#modaleFile").find(".modal-body").html(content);
     $("#modaleFile").modal("show");
   };
 
