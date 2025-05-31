@@ -261,5 +261,245 @@ describe("Given I am connected as an employee", () => {
         expect(newBill.fileName).toBe("test.jpeg");
       });
     });
+
+    test("Then it should handle form submission when pct field is empty", async () => {
+      // Given
+      document.body.innerHTML = NewBillUI();
+      const onNavigate = jest.fn();
+      const newBill = new NewBill({
+        document,
+        onNavigate,
+        store,
+        localStorage: window.localStorage,
+      });
+
+      // Simuler un fichier valide
+      const file = new File(["dummy"], "test.png", { type: "image/png" });
+      const mockEvent = {
+        preventDefault: jest.fn(),
+        target: {
+          value: "C:\\fakepath\\test.png",
+          files: [file],
+        },
+      };
+      newBill.handleChangeFile(mockEvent);
+
+      await waitFor(() => {
+        expect(newBill.fileName).toBe("test.png");
+      });
+
+      // Remplir les champs obligatoires sans le pct
+      fireEvent.change(screen.getByTestId("expense-type"), {
+        target: { value: "Transports" },
+      });
+      fireEvent.change(screen.getByTestId("expense-name"), {
+        target: { value: "Taxi" },
+      });
+      fireEvent.change(screen.getByTestId("amount"), {
+        target: { value: "42" },
+      });
+      fireEvent.change(screen.getByTestId("datepicker"), {
+        target: { value: "2023-01-01" },
+      });
+      fireEvent.change(screen.getByTestId("vat"), { target: { value: "10" } });
+      // Laisser pct vide
+      fireEvent.change(screen.getByTestId("pct"), { target: { value: "" } });
+
+      // When
+      const form = screen.getByTestId("form-new-bill");
+      fireEvent.submit(form);
+
+      // Then
+      await waitFor(() => {
+        expect(onNavigate).toHaveBeenCalledWith(ROUTES_PATH["Bills"]);
+      });
+    });
+
+    test("Then updateBill should handle store error gracefully", async () => {
+      // Given
+      document.body.innerHTML = NewBillUI();
+      const onNavigate = jest.fn();
+      const errorStore = {
+        bills: () => ({
+          create: jest.fn(() =>
+            Promise.resolve({ fileUrl: "test.jpg", key: "123" })
+          ),
+          update: jest.fn(() => Promise.reject(new Error("Update failed"))),
+        }),
+      };
+      const newBill = new NewBill({
+        document,
+        onNavigate,
+        store: errorStore,
+        localStorage: window.localStorage,
+      });
+
+      const consoleSpy = jest
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+
+      // When
+      const bill = {
+        email: "test@test.com",
+        type: "Transports",
+        name: "Taxi",
+        amount: 42,
+        date: "2023-01-01",
+        vat: "10",
+        pct: 20,
+        commentary: "Test",
+        fileUrl: "test.jpg",
+        fileName: "test.png",
+        status: "pending",
+      };
+      newBill.updateBill(bill);
+
+      // Then
+      await waitFor(() => {
+        expect(consoleSpy).toHaveBeenCalledWith(expect.any(Error));
+      });
+      consoleSpy.mockRestore();
+    });
+  });
+
+  // Tests d'intégration
+  describe("When I post a new bill", () => {
+    test("Then it should create a new bill via mock API POST", async () => {
+      // Given
+      document.body.innerHTML = NewBillUI();
+      const onNavigate = jest.fn();
+      const newBill = new NewBill({
+        document,
+        onNavigate,
+        store,
+        localStorage: window.localStorage,
+      });
+
+      // Simuler un fichier valide
+      const file = new File(["dummy"], "test.png", { type: "image/png" });
+      const mockEvent = {
+        preventDefault: jest.fn(),
+        target: {
+          value: "C:\\fakepath\\test.png",
+          files: [file],
+        },
+      };
+      newBill.handleChangeFile(mockEvent);
+
+      // Attendre que le fichier soit traité
+      await waitFor(() => {
+        expect(newBill.fileName).toBe("test.png");
+      });
+
+      // Remplir le formulaire
+      fireEvent.change(screen.getByTestId("expense-type"), {
+        target: { value: "Transports" },
+      });
+      fireEvent.change(screen.getByTestId("expense-name"), {
+        target: { value: "Vol Paris Londres" },
+      });
+      fireEvent.change(screen.getByTestId("amount"), {
+        target: { value: "348" },
+      });
+      fireEvent.change(screen.getByTestId("datepicker"), {
+        target: { value: "2004-04-04" },
+      });
+      fireEvent.change(screen.getByTestId("vat"), { target: { value: "70" } });
+      fireEvent.change(screen.getByTestId("pct"), { target: { value: "20" } });
+      fireEvent.change(screen.getByTestId("commentary"), {
+        target: { value: "Business trip to London" },
+      });
+
+      // When
+      const form = screen.getByTestId("form-new-bill");
+      fireEvent.submit(form);
+
+      // Then
+      await waitFor(() => {
+        expect(onNavigate).toHaveBeenCalledWith(ROUTES_PATH["Bills"]);
+      });
+    });
+
+    test("Then it should handle API error when posting new bill", async () => {
+      // Given
+      const errorStore = {
+        bills: () => ({
+          create: jest.fn(() => Promise.reject(new Error("Erreur 404"))),
+          update: jest.fn(() => Promise.reject(new Error("Erreur 404"))),
+        }),
+      };
+
+      document.body.innerHTML = NewBillUI();
+      const onNavigate = jest.fn();
+      const newBill = new NewBill({
+        document,
+        onNavigate,
+        store: errorStore,
+        localStorage: window.localStorage,
+      });
+
+      const consoleSpy = jest
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+
+      // When
+      const file = new File(["dummy"], "test.png", { type: "image/png" });
+      const mockEvent = {
+        preventDefault: jest.fn(),
+        target: {
+          value: "C:\\fakepath\\test.png",
+          files: [file],
+        },
+      };
+      newBill.handleChangeFile(mockEvent);
+
+      // Then
+      await waitFor(() => {
+        expect(consoleSpy).toHaveBeenCalledWith(expect.any(Error));
+      });
+
+      consoleSpy.mockRestore();
+    });
+
+    test("Then it should handle API error 500", async () => {
+      // Given
+      const errorStore = {
+        bills: () => ({
+          create: jest.fn(() => Promise.reject(new Error("Erreur 500"))),
+          update: jest.fn(() => Promise.reject(new Error("Erreur 500"))),
+        }),
+      };
+
+      document.body.innerHTML = NewBillUI();
+      const onNavigate = jest.fn();
+      const newBill = new NewBill({
+        document,
+        onNavigate,
+        store: errorStore,
+        localStorage: window.localStorage,
+      });
+
+      const consoleSpy = jest
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+
+      // When
+      const file = new File(["dummy"], "test.png", { type: "image/png" });
+      const mockEvent = {
+        preventDefault: jest.fn(),
+        target: {
+          value: "C:\\fakepath\\test.png",
+          files: [file],
+        },
+      };
+      newBill.handleChangeFile(mockEvent);
+
+      // Then
+      await waitFor(() => {
+        expect(consoleSpy).toHaveBeenCalledWith(expect.any(Error));
+      });
+
+      consoleSpy.mockRestore();
+    });
   });
 });
