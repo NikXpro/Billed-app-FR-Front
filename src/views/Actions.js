@@ -9,8 +9,12 @@ export default (fileData) => {
   const fileName =
     fileData && typeof fileData === "object" ? fileData.fileName : null;
 
+  // Gérer les cas où billUrl est null, undefined ou 'null'
+  const safeUrl =
+    billUrl && billUrl !== "null" && billUrl.trim() !== "" ? billUrl : "";
+
   return `<div class="icon-actions">
-      <div id="eye" data-testid="icon-eye" data-bill-url=${billUrl} data-file-name="${
+      <div id="eye" data-testid="icon-eye" data-bill-url="${safeUrl}" data-file-name="${
     fileName || ""
   }">
       ${eyeBlueIcon}
