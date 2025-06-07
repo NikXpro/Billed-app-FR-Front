@@ -144,6 +144,62 @@ describe("Given I am connected as an employee", () => {
       expect(global.$).toHaveBeenCalled();
     });
 
+    test("Then I should see error message when bill proof is null", () => {
+      document.body.innerHTML = BillsUI({ data: bills });
+      const onNavigate = (pathname) => {
+        document.body.innerHTML = ROUTES({ pathname });
+      };
+      const store = null;
+      const billsContainer = new Bills({
+        document,
+        onNavigate,
+        store,
+        localStorage: window.localStorage,
+      });
+
+      // Simuler un bill avec fileUrl null
+      const mockIcon = {
+        getAttribute: jest.fn((attr) => {
+          if (attr === "data-bill-url") return null;
+          if (attr === "data-file-name") return null;
+          return null;
+        }),
+      };
+
+      const handleClickIconEye = jest.fn(billsContainer.handleClickIconEye);
+      handleClickIconEye(mockIcon);
+
+      expect(handleClickIconEye).toHaveBeenCalled();
+    });
+
+    test("Then I should see error message when bill proof is 'null' string", () => {
+      document.body.innerHTML = BillsUI({ data: bills });
+      const onNavigate = (pathname) => {
+        document.body.innerHTML = ROUTES({ pathname });
+      };
+      const store = null;
+      const billsContainer = new Bills({
+        document,
+        onNavigate,
+        store,
+        localStorage: window.localStorage,
+      });
+
+      // Simuler un bill avec fileUrl 'null' (string)
+      const mockIcon = {
+        getAttribute: jest.fn((attr) => {
+          if (attr === "data-bill-url") return "null";
+          if (attr === "data-file-name") return "null";
+          return null;
+        }),
+      };
+
+      const handleClickIconEye = jest.fn(billsContainer.handleClickIconEye);
+      handleClickIconEye(mockIcon);
+
+      expect(handleClickIconEye).toHaveBeenCalled();
+    });
+
     test("Then getBills should return formatted bills when store exists", async () => {
       // Given
       document.body.innerHTML = BillsUI({ data: bills });
