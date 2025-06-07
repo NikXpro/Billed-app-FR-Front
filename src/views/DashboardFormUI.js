@@ -77,7 +77,7 @@ export default (bill) => {
             <div class='icons-container'>
               <span id="icon-eye-d" data-testid="icon-eye-d" data-bill-url="${
                 bill.fileUrl
-              }"> ${eyeWhite} </span>
+              }" data-file-name="${bill.fileName || ""}"> ${eyeWhite} </span>
             </div>
           </div>
         </div>

@@ -84,17 +84,31 @@ export default class {
 
   handleClickIconEye = () => {
     const billUrl = $("#icon-eye-d").attr("data-bill-url");
+    const fileName = $("#icon-eye-d").attr("data-file-name");
     const imgWidth = Math.floor($("#modaleFileAdmin1").width() * 0.8);
     const allowedExtensions = ["jpg", "jpeg", "png"];
-    const extension = billUrl
-      ? billUrl.split(".").pop().toLowerCase().split("?")[0]
-      : "";
+
     let content;
-    if (billUrl && allowedExtensions.includes(extension)) {
-      content = `<div style='text-align: center;'><img width=${imgWidth} src=${billUrl} alt="Bill"/></div>`;
-    } else {
+
+    // Vérifier si l'URL existe et n'est pas vide
+    if (!billUrl || billUrl.trim() === "") {
       content = `<div style='color:red;text-align:center;padding:2em'>Fichier justificatif manquant ou au mauvais format</div>`;
+    } else {
+      // Utiliser le fileName pour valider l'extension au lieu de l'URL hashée
+      let isValidFile = false;
+
+      if (fileName && fileName.trim() !== "") {
+        const extension = fileName.split(".").pop().toLowerCase();
+        isValidFile = allowedExtensions.includes(extension);
+      }
+
+      if (isValidFile) {
+        content = `<div style='text-align: center;'><img width=${imgWidth} src=${billUrl} alt="Bill"/></div>`;
+      } else {
+        content = `<div style='color:red;text-align:center;padding:2em'>Fichier justificatif manquant ou au mauvais format</div>`;
+      }
     }
+
     $("#modaleFileAdmin1").find(".modal-body").html(content);
     if (typeof $("#modaleFileAdmin1").modal === "function")
       $("#modaleFileAdmin1").modal("show");
