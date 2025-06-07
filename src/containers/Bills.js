@@ -32,20 +32,20 @@ export default class {
 
     let content;
 
-    // Vérifier si l'URL existe et n'est pas vide
-    if (!billUrl || billUrl.trim() === "") {
+    // Vérifier si l'URL existe et n'est pas vide (gérer aussi le cas 'null')
+    if (!billUrl || billUrl.trim() === "" || billUrl === "null") {
       content = `<div style='color:red;text-align:center;padding:2em'>Fichier justificatif manquant ou au mauvais format</div>`;
     } else {
       // Utiliser le fileName pour valider l'extension au lieu de l'URL hashée
       let isValidFile = false;
 
-      if (fileName && fileName.trim() !== "") {
+      if (fileName && fileName.trim() !== "" && fileName !== "null") {
         const extension = fileName.split(".").pop().toLowerCase();
         isValidFile = allowedExtensions.includes(extension);
       }
 
       if (isValidFile) {
-        content = `<div style='text-align: center;' class="bill-proof-container"><img width="100%" src=${billUrl} alt="Bill" /></div>`;
+        content = `<div style='text-align: center;' class="bill-proof-container"><img width="100%" src="${billUrl}" alt="Bill" /></div>`;
       } else {
         content = `<div style='color:red;text-align:center;padding:2em'>Fichier justificatif manquant ou au mauvais format</div>`;
       }
