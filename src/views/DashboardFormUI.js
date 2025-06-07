@@ -70,13 +70,13 @@ export default (bill) => {
           <label for="file" class="bold-label">Justificatif</label>
             <div class='input-field input-flex file-flex'>
             <span id="file-name-admin">${
-              bill.fileName
+              bill.fileName && bill.fileName !== "null"
                 ? bill.fileName
                 : '<span style="color:red">Fichier manquant ou au mauvais format</span>'
             }</span>
             <div class='icons-container'>
               <span id="icon-eye-d" data-testid="icon-eye-d" data-bill-url="${
-                bill.fileUrl
+                bill.fileUrl || ""
               }" data-file-name="${bill.fileName || ""}"> ${eyeWhite} </span>
             </div>
           </div>
