@@ -114,6 +114,100 @@ describe("Given that I am a user on login page", () => {
     test("It should renders Bills page", () => {
       expect(screen.getAllByText("Mes notes de frais")).toBeTruthy();
     });
+
+    test("Then if login fails, it should call createUser and navigate to Bills page", async () => {
+      document.body.innerHTML = LoginUI();
+      const inputData = {
+        email: "johndoe@email.com",
+        password: "azerty",
+      };
+
+      const inputEmailUser = screen.getByTestId("employee-email-input");
+      fireEvent.change(inputEmailUser, { target: { value: inputData.email } });
+
+      const inputPasswordUser = screen.getByTestId("employee-password-input");
+      fireEvent.change(inputPasswordUser, {
+        target: { value: inputData.password },
+      });
+
+      Object.defineProperty(window, "localStorage", {
+        value: {
+          getItem: jest.fn(() => null),
+          setItem: jest.fn(() => null),
+        },
+        writable: true,
+      });
+
+      const onNavigate = jest.fn();
+      const store = jest.fn();
+
+      const login = new Login({
+        document,
+        localStorage: window.localStorage,
+        onNavigate,
+        PREVIOUS_LOCATION: "",
+        store,
+      });
+
+      // Mock login to reject and createUser to resolve
+      login.login = jest.fn().mockRejectedValue(new Error("Login failed"));
+      login.createUser = jest.fn().mockResolvedValue({});
+
+      const form = screen.getByTestId("form-employee");
+      fireEvent.submit(form);
+
+      // Wait for promises to resolve
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(login.createUser).toHaveBeenCalled();
+      expect(onNavigate).toHaveBeenCalledWith("#employee/bills");
+    });
+
+    test("Then if login succeeds, it should navigate to Bills page and set background color", async () => {
+      document.body.innerHTML = LoginUI();
+      const inputData = {
+        email: "johndoe@email.com",
+        password: "azerty",
+      };
+
+      const inputEmailUser = screen.getByTestId("employee-email-input");
+      fireEvent.change(inputEmailUser, { target: { value: inputData.email } });
+
+      const inputPasswordUser = screen.getByTestId("employee-password-input");
+      fireEvent.change(inputPasswordUser, {
+        target: { value: inputData.password },
+      });
+
+      Object.defineProperty(window, "localStorage", {
+        value: {
+          getItem: jest.fn(() => null),
+          setItem: jest.fn(() => null),
+        },
+        writable: true,
+      });
+
+      const onNavigate = jest.fn();
+      const store = jest.fn();
+
+      const login = new Login({
+        document,
+        localStorage: window.localStorage,
+        onNavigate,
+        PREVIOUS_LOCATION: "",
+        store,
+      });
+
+      login.login = jest.fn().mockResolvedValue({});
+
+      const form = screen.getByTestId("form-employee");
+      fireEvent.submit(form);
+
+      // Wait for promises to resolve
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(onNavigate).toHaveBeenCalledWith("#employee/bills");
+      expect(document.body.style.backgroundColor).toBe("rgb(255, 255, 255)");
+    });
   });
 });
 
@@ -225,6 +319,138 @@ describe("Given that I am a user on login page", () => {
 
     test("It should renders HR dashboard page", () => {
       expect(screen.queryByText("Validations")).toBeTruthy();
+    });
+
+    test("Then if admin login fails, it should call createUser and navigate to Dashboard", async () => {
+      document.body.innerHTML = LoginUI();
+      const inputData = {
+        email: "admin@test.com",
+        password: "admin123",
+      };
+
+      const inputEmailUser = screen.getByTestId("admin-email-input");
+      fireEvent.change(inputEmailUser, { target: { value: inputData.email } });
+
+      const inputPasswordUser = screen.getByTestId("admin-password-input");
+      fireEvent.change(inputPasswordUser, {
+        target: { value: inputData.password },
+      });
+
+      Object.defineProperty(window, "localStorage", {
+        value: {
+          getItem: jest.fn(() => null),
+          setItem: jest.fn(() => null),
+        },
+        writable: true,
+      });
+
+      const onNavigate = jest.fn();
+      const store = jest.fn();
+
+      const login = new Login({
+        document,
+        localStorage: window.localStorage,
+        onNavigate,
+        PREVIOUS_LOCATION: "",
+        store,
+      });
+
+      // Mock login to reject and createUser to resolve
+      login.login = jest.fn().mockRejectedValue(new Error("Login failed"));
+      login.createUser = jest.fn().mockResolvedValue({});
+
+      const form = screen.getByTestId("form-admin");
+      fireEvent.submit(form);
+
+      // Wait for promises to resolve
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(login.createUser).toHaveBeenCalled();
+      expect(onNavigate).toHaveBeenCalledWith("#admin/dashboard");
+    });
+
+    test("Then if admin login succeeds, it should navigate to Dashboard and set background color", async () => {
+      document.body.innerHTML = LoginUI();
+      const inputData = {
+        email: "admin@test.com",
+        password: "admin123",
+      };
+
+      const inputEmailUser = screen.getByTestId("admin-email-input");
+      fireEvent.change(inputEmailUser, { target: { value: inputData.email } });
+
+      const inputPasswordUser = screen.getByTestId("admin-password-input");
+      fireEvent.change(inputPasswordUser, {
+        target: { value: inputData.password },
+      });
+
+      Object.defineProperty(window, "localStorage", {
+        value: {
+          getItem: jest.fn(() => null),
+          setItem: jest.fn(() => null),
+        },
+        writable: true,
+      });
+
+      const onNavigate = jest.fn();
+      const store = jest.fn();
+
+      const login = new Login({
+        document,
+        localStorage: window.localStorage,
+        onNavigate,
+        PREVIOUS_LOCATION: "",
+        store,
+      });
+
+      login.login = jest.fn().mockResolvedValue({});
+
+      const form = screen.getByTestId("form-admin");
+      fireEvent.submit(form);
+
+      // Wait for promises to resolve
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(onNavigate).toHaveBeenCalledWith("#admin/dashboard");
+      expect(document.body.style.backgroundColor).toBe("rgb(255, 255, 255)");
+    });
+  });
+});
+
+describe("Given that I want to test edge cases for Login", () => {
+  describe("When store is null", () => {
+    test("Then login method should return null", () => {
+      document.body.innerHTML = LoginUI();
+
+      const login = new Login({
+        document,
+        localStorage: window.localStorage,
+        onNavigate: jest.fn(),
+        PREVIOUS_LOCATION: "",
+        store: null,
+      });
+
+      const result = login.login({ email: "test@test.com", password: "test" });
+      expect(result).toBeNull();
+    });
+
+    test("Then createUser method should return null", () => {
+      document.body.innerHTML = LoginUI();
+
+      const login = new Login({
+        document,
+        localStorage: window.localStorage,
+        onNavigate: jest.fn(),
+        PREVIOUS_LOCATION: "",
+        store: null,
+      });
+
+      const result = login.createUser({
+        type: "Employee",
+        email: "test@test.com",
+        password: "test",
+      });
+      expect(result).toBeNull();
     });
   });
 });
