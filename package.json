@@ -8,12 +8,17 @@
       "./setup-jest.js"
     ],
     "collectCoverageFrom": [
-      "**/*.{js,jsx}",
+      "src/**/*.{js,jsx}",
       "!**/app/**",
       "!**/assets/**",
       "!**/external/**",
       "!**/fixtures/**",
-      "!**/lcov-report/**"
+      "!**/lcov-report/**",
+      "!**/coverage/**",
+      "!**/node_modules/**",
+      "!**/__mocks__/**",
+      "!**/setup-jest.js",
+      "!**/usersTest.js"
     ]
   },
   "type": "module",
