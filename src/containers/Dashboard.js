@@ -145,8 +145,13 @@ export default class {
       status: "accepted",
       commentAdmin: $("#commentary2").val(),
     };
-    this.updateBill(newBill);
-    this.onNavigate(ROUTES_PATH["Dashboard"]);
+    this.updateBill(newBill)
+      .then(() => {
+        this.onNavigate(ROUTES_PATH["Dashboard"]);
+      })
+      .catch((error) => {
+        console.error("Erreur lors de l'acceptation de la note:", error);
+      });
   };
 
   handleRefuseSubmit = (e, bill) => {
@@ -155,8 +160,13 @@ export default class {
       status: "refused",
       commentAdmin: $("#commentary2").val(),
     };
-    this.updateBill(newBill);
-    this.onNavigate(ROUTES_PATH["Dashboard"]);
+    this.updateBill(newBill)
+      .then(() => {
+        this.onNavigate(ROUTES_PATH["Dashboard"]);
+      })
+      .catch((error) => {
+        console.error("Erreur lors du refus de la note:", error);
+      });
   };
 
   handleShowTickets(e, bills, index) {
@@ -215,5 +225,6 @@ export default class {
         .then((bill) => bill)
         .catch(console.log);
     }
+    return Promise.resolve();
   };
 }

@@ -195,7 +195,7 @@ describe("Given I am connected as an Admin", () => {
 
 describe("Given I am connected as Admin, and I am on Dashboard page, and I clicked on a pending bill", () => {
   describe("When I click on accept button", () => {
-    test("I should be sent on Dashboard with big billed icon instead of form", () => {
+    test("I should be sent on Dashboard with big billed icon instead of form", async () => {
       Object.defineProperty(window, "localStorage", {
         value: localStorageMock,
       });
@@ -205,9 +205,10 @@ describe("Given I am connected as Admin, and I am on Dashboard page, and I click
           type: "Admin",
         })
       );
-      document.body.innerHTML = DashboardFormUI(bills[0]);
 
+      let navigateCalled = false;
       const onNavigate = (pathname) => {
+        navigateCalled = true;
         document.body.innerHTML = ROUTES({ pathname });
       };
       const store = null;
@@ -219,19 +220,42 @@ describe("Given I am connected as Admin, and I am on Dashboard page, and I click
         localStorage: window.localStorage,
       });
 
-      const acceptButton = screen.getByTestId("btn-accept-bill-d");
-      const handleAcceptSubmit = jest.fn((e) =>
-        dashboard.handleAcceptSubmit(e, bills[0])
+      // Simuler l'affichage du dashboard complet
+      document.body.innerHTML = DashboardUI({ data: { bills } });
+
+      // Simuler le clic sur la flèche pour afficher les tickets en attente
+      const handleShowTickets1 = jest.fn((e) =>
+        dashboard.handleShowTickets(e, bills, 1)
       );
-      acceptButton.addEventListener("click", handleAcceptSubmit);
+      const icon1 = screen.getByTestId("arrow-icon1");
+      icon1.addEventListener("click", handleShowTickets1);
+      fireEvent.click(icon1);
+
+      // Attendre que les tickets soient affichés
+      await waitFor(() => screen.getByTestId(`open-bill47qAXb6fIm2zOKkLzMro`));
+
+      // Cliquer sur le ticket pour ouvrir le formulaire
+      const iconEdit = screen.getByTestId("open-bill47qAXb6fIm2zOKkLzMro");
+      fireEvent.click(iconEdit);
+
+      // Attendre que le formulaire soit affiché
+      await waitFor(() => screen.getByTestId("btn-accept-bill-d"));
+
+      // Cliquer sur le bouton accepter
+      const acceptButton = screen.getByTestId("btn-accept-bill-d");
       fireEvent.click(acceptButton);
-      expect(handleAcceptSubmit).toHaveBeenCalled();
+
+      // Attendre que la navigation soit appelée
+      await waitFor(() => {
+        expect(navigateCalled).toBe(true);
+      });
+
       const bigBilledIcon = screen.queryByTestId("big-billed-icon");
       expect(bigBilledIcon).toBeTruthy();
     });
   });
   describe("When I click on refuse button", () => {
-    test("I should be sent on Dashboard with big billed icon instead of form", () => {
+    test("I should be sent on Dashboard with big billed icon instead of form", async () => {
       Object.defineProperty(window, "localStorage", {
         value: localStorageMock,
       });
@@ -241,9 +265,10 @@ describe("Given I am connected as Admin, and I am on Dashboard page, and I click
           type: "Admin",
         })
       );
-      document.body.innerHTML = DashboardFormUI(bills[0]);
 
+      let navigateCalled = false;
       const onNavigate = (pathname) => {
+        navigateCalled = true;
         document.body.innerHTML = ROUTES({ pathname });
       };
       const store = null;
@@ -254,13 +279,37 @@ describe("Given I am connected as Admin, and I am on Dashboard page, and I click
         bills,
         localStorage: window.localStorage,
       });
-      const refuseButton = screen.getByTestId("btn-refuse-bill-d");
-      const handleRefuseSubmit = jest.fn((e) =>
-        dashboard.handleRefuseSubmit(e, bills[0])
+
+      // Simuler l'affichage du dashboard complet
+      document.body.innerHTML = DashboardUI({ data: { bills } });
+
+      // Simuler le clic sur la flèche pour afficher les tickets en attente
+      const handleShowTickets1 = jest.fn((e) =>
+        dashboard.handleShowTickets(e, bills, 1)
       );
-      refuseButton.addEventListener("click", handleRefuseSubmit);
+      const icon1 = screen.getByTestId("arrow-icon1");
+      icon1.addEventListener("click", handleShowTickets1);
+      fireEvent.click(icon1);
+
+      // Attendre que les tickets soient affichés
+      await waitFor(() => screen.getByTestId(`open-bill47qAXb6fIm2zOKkLzMro`));
+
+      // Cliquer sur le ticket pour ouvrir le formulaire
+      const iconEdit = screen.getByTestId("open-bill47qAXb6fIm2zOKkLzMro");
+      fireEvent.click(iconEdit);
+
+      // Attendre que le formulaire soit affiché
+      await waitFor(() => screen.getByTestId("btn-refuse-bill-d"));
+
+      // Cliquer sur le bouton refuser
+      const refuseButton = screen.getByTestId("btn-refuse-bill-d");
       fireEvent.click(refuseButton);
-      expect(handleRefuseSubmit).toHaveBeenCalled();
+
+      // Attendre que la navigation soit appelée
+      await waitFor(() => {
+        expect(navigateCalled).toBe(true);
+      });
+
       const bigBilledIcon = screen.queryByTestId("big-billed-icon");
       expect(bigBilledIcon).toBeTruthy();
     });
